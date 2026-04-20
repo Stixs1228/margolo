@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Фильм</title>
+
+<style>
+body{margin:0;background:#224232;color:white;font-family:Arial;text-align:center;}
+.container{padding:20px;}
+img{width:200px;border-radius:10px;}
+.back{color:rgb(255, 0, 0);cursor:pointer;margin-bottom:10px;}
+iframe{width:100%;max-width:600px;height:300px;margin-top:20px;border-radius:10px;}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="back" onclick="history.back()">⬅ Назад</div>
+
+<img id="poster">
+<h1 id="title"></h1>
+
+<p id="genres"></p>
+<p id="rating"></p>
+<p id="desc"></p>
+
+<div id="trailer"></div>
+
+</div>
+
+<script>
+
+const API_KEY = "95bb09a244230d206b889e6a6bb48ded";
+const IMG = "https://image.tmdb.org/t/p/w500";
+
+const id = new URLSearchParams(location.search).get("id");
+
+/* ================= */
+async function load() {
+
+  const res = await fetch(
+    `https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}&language=ru-RU`
+  );
+
+  const m = await res.json();
+
+  document.getElementById("poster").src = IMG + m.poster_path;
+  document.getElementById("title").textContent = m.title;
+
+  document.getElementById("genres").textContent =
+    "Жанр: " + m.genres.map(g => g.name).join(", ");
+
+  document.getElementById("rating").textContent =
+    "Рейтинг: ⭐ " + m.vote_average.toFixed(1);
+
+  document.getElementById("desc").textContent =
+    m.overview || "";
+
+  /* трейлер */
+  const v = await fetch(
+    `https://api.themoviedb.org/3/movie/${id}/videos?api_key=${API_KEY}`
+  );
+
+  const data = await v.json();
+
+  const trailer = data.results.find(x => x.type === "Trailer");
+
+  if (trailer) {
+    document.getElementById("trailer").innerHTML =
+      `<iframe src="https://www.youtube.com/embed/${trailer.key}" allowfullscreen></iframe>`;
+  }
+}
+
+load();
+
+</script>
+
+</body>
+</html>
